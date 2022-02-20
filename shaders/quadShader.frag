@@ -8,14 +8,30 @@ uniform vec3 offset;
 uniform vec2 dim;
 
 
-// UTIL FUNCTIONS
+
+double dist(dvec2 a, dvec2 b) { return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y)); }
+dvec2 conjugate(dvec2 a) { return dvec2(a.x, -a.y); }
+double magnitude2(dvec2 a) { return a.x*a.x + a.y*a.y; }
+
+
+dvec2 imAdd(dvec2 a, dvec2 b) { return dvec2(a.x+b.x, a.y+b.y); }
+dvec2 imSub(dvec2 a, dvec2 b) { return dvec2(a.x-b.x, a.y-b.y); }
+dvec2 imMul(dvec2 a, dvec2 b) { return dvec2(a.x*b.x-a.y*b.y, a.x*b.y + a.y*b.x); }
+
+dvec2 imDiv(dvec2 a, dvec2 b)
+{
+	double mag = magnitude2(b);
+	dvec2 c = imMul(a, conjugate(b));
+	return dvec2(c.x/mag, c.y/mag);
+}
+
 float modu(float a, float b)
 {
 	int n = int(a / b);
 	return a - n * b;
 }
 
-vec3 getColFromHue(int i, int tot)
+vec3 getCol(int i, int tot)
 {
 	if(i == tot)
 		return vec3(0, 0, 0);
@@ -40,6 +56,13 @@ vec3 getColFromHue(int i, int tot)
 		return vec3(C, 0, X) + m;
 }
 
+vec2 getXY() 
+{
+	float x = 4.0 * (gl_FragCoord.x) / (dim.x*offset.z) + offset.x;
+	float y = 4.0 * (gl_FragCoord.y) / (dim.y*offset.z) + offset.y;
+	return vec2(x, y);
+}
+
 // MANDELBROT 
 
 vec3 mandelbrot()
@@ -60,11 +83,8 @@ vec3 mandelbrot()
 	return getCol(i, tot);
 */
 
-	float x = 4.0 * (gl_FragCoord.x) / (dim.x*offset.z) + offset.x;
-	float y = 4.0 * (gl_FragCoord.y) / (dim.y*offset.z) + offset.y;
-	
 	vec2 z = vec2(0, 0);
-	vec2 c = vec2(x, y);
+	vec2 c = getXY();
 
 	int tot = min(50 + int(offset.z), 200);
 	int i=0;
@@ -72,33 +92,56 @@ vec3 mandelbrot()
 		z = vec2(z.x*z.x - z.y*z.y + c.x, 2 * z.x*z.y + c.y);
 		i++;
 	}
-	return getColFromHue(i, tot);
+	return getCol(i, tot);
 }
 
 
+// Reciprocal?
+
+vec3 reciprocal() 
+{
+	dvec2 z = dvec2(0, 0);
+	dvec2 c = getXY();
+
+	int tot = 50;
+	int i=0;
+	dvec2 a, b;
+	while(i<tot && z.x*z.x + z.y*z.y<4.0) {
+		a = dvec2(z.x*z.x*z.x-3*z.x*z.y*z.y+1, 3*z.x*z.x*z.y-z.y*z.y*z.y); 
+		b = dvec2(c.x*(z.x*z.x+z.y*z.y)-2*z.x*z.y*c.y+1, 2*z.x*z.y*c.x + c.y*(z.x*z.x-z.y*z.y));
+		z = imDiv(a, b);
+		i++;
+	}
+	return getCol(i, tot);
+}
+
+// Multibrot?
+vec3 multibrot() 
+{
+	dvec2 z = dvec2(0, 0);
+	dvec2 c = getXY();
+
+	int tot = 50;
+	int i=0;
+	dvec2 a, b;
+	while(i<tot && z.x*z.x + z.y*z.y<4.0) {
+		z = vec2(z.x*z.x*z.x-3*z.x*z.y*z.y+c.x, 3*z.x*z.x*z.y-z.y*z.y*z.y+c.y);
+		i++;
+	}
+	return getCol(i, tot);
+}
 // NEWTON
 
 #define NUM_ROOTS 5
 uniform dvec2 roots[NUM_ROOTS];
-
-double dist(dvec2 a, dvec2 b) { return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y)); }
-dvec2 conjugate(dvec2 a) { return dvec2(a.x, -a.y); }
-double magnitude2(dvec2 a) { return a.x*a.x + a.y*a.y; }
-
-
-dvec2 imAdd(dvec2 a, dvec2 b) { return dvec2(a.x+b.x, a.y+b.y); }
-dvec2 imSub(dvec2 a, dvec2 b) { return dvec2(a.x-b.x, a.y-b.y); }
-dvec2 imMul(dvec2 a, dvec2 b) { return dvec2(a.x*b.x-a.y*b.y, a.x*b.y + a.y*b.x); }
-
-dvec2 imDiv(dvec2 a, dvec2 b)
-{
-	double mag = magnitude2(b);
-	a = imMul(a, conjugate(b));
-	return dvec2(a.x/mag, a.y/mag);
-}
-
 dvec2 deriv(dvec2 proots[NUM_ROOTS]) 
 {
+	for(int k=0; k<NUM_ROOTS; k++) {
+		if(proots[k].x == 0 && proots[k].y == 0) {
+			color = vec3(0);
+
+		}
+	}
 	dvec2 cumlproots[NUM_ROOTS-1];
 	cumlproots[NUM_ROOTS-2] = proots[NUM_ROOTS-1]; // cumulative mul proots
 	for(int i=NUM_ROOTS-2; i>0; i--) {
@@ -120,48 +163,29 @@ vec3 newton()
 	double y = 4.0 * (gl_FragCoord.y) / (dim.y*offset.z) + offset.y;
 	dvec2 xy = dvec2(x, y);
 
-	// Renders roots 
-	/*
-	double md = 1, d2;
-	int index2;
-	bool near = false;
-	for(int k=0; k<NUM_ROOTS; k++) {
-		d2 = dist(xy, roots[k]);
-		if(d2 < md) {
-			near = true;
-			index2 = k;
-			md = d2;
-		}
-	} 
-	if(near) {
-		return vec3(0); 
-	}
-	*/
-	// return near ? vec3(0) : vec3(1); 
-	
-
 	// poly y = (x-r1)(x-r2)...(x-rn)
 	
 	dvec2 proots[NUM_ROOTS];
 	
 	dvec2 f  = dvec2(1, 0);
 	dvec2 fp = dvec2(1, 0);
-	for(int i=0; i<15; i++) {
-		for(int r=0; r<NUM_ROOTS; r++) {
+	for(int i=0; i<1; i++) {
+		for(int r=2; r<NUM_ROOTS; r++) {
 			proots[r] = imSub(xy, roots[r]); // [(x-r1), (x-r2), ..., (x-rn)]
-			if(sqrt(magnitude2(proots[r])) < 0.025)
-				return getColFromHue(r, NUM_ROOTS);
+			if(sqrt(magnitude2(proots[r])) < 0.1) {
+				return getCol(r, NUM_ROOTS);
+			}
 
 			f = imMul(f, proots[r]);
 		}
-		//fp = deriv(proots);
+		fp = deriv(proots);
 		xy = imSub(xy, imDiv(f, fp));
 	} 
 
 	double minval = dist(roots[0], xy);
 	int index = 0;
 	double d;
-	for(int r=0; r<NUM_ROOTS; r++) {
+	for(int r=1; r<NUM_ROOTS; r++) {
 		d = dist(roots[r], xy);
 		if(d < minval) {
 			index = r;
@@ -169,7 +193,7 @@ vec3 newton()
 		}
 	}
 
-	return getColFromHue(index, NUM_ROOTS);
+	return getCol(index, NUM_ROOTS);
 }
 
 
@@ -179,6 +203,10 @@ void main()
 		color = mandelbrot();
 	else if(fractalType == 1)
 		color = newton();
+	else if(fractalType == 2)
+		color = reciprocal();
+	else if(fractalType == 3)
+		color = multibrot();
 	else
 		color = vec3(1, 1, 1);
 }

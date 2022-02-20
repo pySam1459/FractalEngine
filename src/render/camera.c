@@ -1,6 +1,6 @@
 #include "camera.h"
 
-const float speed = 0.02;
+const float speed = 0.017;
 const float zoom = 1.01;
 
 struct Camera camCreate()
@@ -38,5 +38,9 @@ void camReset(struct Camera *cam)
 	if (cfractal == mandelbrot)
 		glm_vec3_copy((vec3) { -2.5f, -2.0f, 1.0f }, cam->pos);
 	else if (cfractal == newton)
-		glm_vec3_copy((vec3) { 0.0f, 0.0f, 1.0f }, cam->pos);
+		glm_vec3_copy((vec3) { -2.0f, -2.0f, 1.0f }, cam->pos);
+	else if (cfractal == reciprocal)
+		glm_vec3_copy((vec3) { -5.0f, -5.0f, 2.0f }, cam->pos);
+	else if (cfractal == multibrot)
+		glm_vec3_copy((vec3) { -2.5f, -2.0f, 1.0f }, cam->pos);
 }

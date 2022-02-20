@@ -7,9 +7,9 @@
 #include "window.h"
 #include "camera.h"
 
-#define NUM_FRACTALS 2
+#define NUM_FRACTALS 4
 
-enum Fractal{ mandelbrot=0, newton=1 };
+enum Fractal{ mandelbrot=0, newton=1, reciprocal=2, multibrot=3};
 
 static const enum Fractal fractalMap[NUM_FRACTALS];
 
