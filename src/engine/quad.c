@@ -34,7 +34,7 @@ void loadUniforms(struct Quad quad)
 {
 	uniformUInt(quad.shaderID, cfractal, "fractalType");
 	uniformVec2(quad.shaderID, 1, (vec2) {(float)WIDTH, (float)HEIGHT}, "dim");
-
+	/*
 	if (cfractal == newton) {
 		float roots[NEWTON_ROOTS*2];
 		for(int k=0; k<NEWTON_ROOTS; k++) {
@@ -42,7 +42,7 @@ void loadUniforms(struct Quad quad)
 			roots[2*k+1] = sin(2.0f*k*GLM_PI/NEWTON_ROOTS);
 		}
 		uniformVec2(quad.shaderID, NEWTON_ROOTS, roots, "roots");
-	}
+	}*/
 }
 
 void quadRender(struct Quad quad)

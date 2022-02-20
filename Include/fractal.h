@@ -9,7 +9,7 @@
 
 #define NUM_FRACTALS 4
 
-enum Fractal{ mandelbrot=0, newton=1, reciprocal=2, multibrot=3};
+enum Fractal{ mandelbrot=0, multibrot=1, cubebrot=2, reciprocal=3};
 
 static const enum Fractal fractalMap[NUM_FRACTALS];
 

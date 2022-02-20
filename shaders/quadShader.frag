@@ -95,7 +95,6 @@ vec3 mandelbrot()
 	return getCol(i, tot);
 }
 
-
 // Reciprocal?
 
 vec3 reciprocal() 
@@ -103,10 +102,10 @@ vec3 reciprocal()
 	dvec2 z = dvec2(0, 0);
 	dvec2 c = getXY();
 
-	int tot = 50;
+	int tot = 10;
 	int i=0;
 	dvec2 a, b;
-	while(i<tot && z.x*z.x + z.y*z.y<4.0) {
+	while(i<tot && z.x*z.x + z.y*z.y<2.0) {
 		a = dvec2(z.x*z.x*z.x-3*z.x*z.y*z.y+1, 3*z.x*z.x*z.y-z.y*z.y*z.y); 
 		b = dvec2(c.x*(z.x*z.x+z.y*z.y)-2*z.x*z.y*c.y+1, 2*z.x*z.y*c.x + c.y*(z.x*z.x-z.y*z.y));
 		z = imDiv(a, b);
@@ -121,7 +120,7 @@ vec3 multibrot()
 	dvec2 z = dvec2(0, 0);
 	dvec2 c = getXY();
 
-	int tot = 50;
+	int tot = min(50 + int(offset.z), 200);
 	int i=0;
 	dvec2 a, b;
 	while(i<tot && z.x*z.x + z.y*z.y<4.0) {
@@ -130,6 +129,24 @@ vec3 multibrot()
 	}
 	return getCol(i, tot);
 }
+
+vec3 cubebrot() 
+{
+	dvec2 z = dvec2(0, 0);
+	dvec2 c = getXY();
+
+	int tot = min(50 + int(offset.z), 200);
+	int i=0;
+	double a, b;
+	while(i<tot && z.x*z.x + z.y*z.y<4.0) {
+		a = z.x*z.x*z.x-3*z.x*z.y*z.y-z.x*z.x-z.y*z.y+z.x+c.x;
+		b = 3*z.x*z.x*z.y-z.y*z.y*z.y-2*z.x*z.y+z.y+c.y;
+		z = dvec2(a, b);
+		i++;
+	}
+	return getCol(i, tot);
+}
+
 // NEWTON
 
 #define NUM_ROOTS 5
@@ -202,11 +219,11 @@ void main()
 	if(fractalType == 0)
 		color = mandelbrot();
 	else if(fractalType == 1)
-		color = newton();
-	else if(fractalType == 2)
-		color = reciprocal();
-	else if(fractalType == 3)
 		color = multibrot();
+	else if(fractalType == 2)
+		color = cubebrot();
+	else if(fractalType == 3)
+		color = reciprocal();
 	else
 		color = vec3(1, 1, 1);
 }

@@ -35,12 +35,10 @@ void camUpdate(struct Camera *cam, GLuint shaderID) {
 
 void camReset(struct Camera *cam)
 {
-	if (cfractal == mandelbrot)
+	if (cfractal == mandelbrot || cfractal == multibrot || cfractal == cubebrot)
 		glm_vec3_copy((vec3) { -2.5f, -2.0f, 1.0f }, cam->pos);
-	else if (cfractal == newton)
-		glm_vec3_copy((vec3) { -2.0f, -2.0f, 1.0f }, cam->pos);
+	//else if (cfractal == newton)
+	//	glm_vec3_copy((vec3) { -2.0f, -2.0f, 1.0f }, cam->pos);
 	else if (cfractal == reciprocal)
 		glm_vec3_copy((vec3) { -5.0f, -5.0f, 2.0f }, cam->pos);
-	else if (cfractal == multibrot)
-		glm_vec3_copy((vec3) { -2.5f, -2.0f, 1.0f }, cam->pos);
 }

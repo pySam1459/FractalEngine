@@ -1,7 +1,7 @@
 #include "fractal.h"
 
-const enum Fractal fractalMap[NUM_FRACTALS] = { mandelbrot, newton, reciprocal, multibrot };
-enum Fractal cfractal = multibrot; //reciprocal; //mandelbrot; //newton;
+const enum Fractal fractalMap[NUM_FRACTALS] = { mandelbrot, multibrot, cubebrot, reciprocal };
+enum Fractal cfractal = mandelbrot;
 
 void pickFractal() 
 {
